@@ -7,6 +7,8 @@ import { WorldHUD } from './components/WorldHUD';
 import { SystemNodeModal } from './components/SystemNodeModal';
 import { CommandPalette } from './components/CommandPalette';
 
+import { useEffect } from 'react';
+
 export default function App() {
   const [bootComplete, setBootComplete] = useState<boolean>(false);
   const [activeNodeId, setActiveNodeId] = useState<RegionId | null>(null);
@@ -15,6 +17,17 @@ export default function App() {
 
   const activeNode = useMemo(() => {
     return WORLD_NODES.find(n => n.id === activeNodeId) || null;
+  }, [activeNodeId]);
+
+  // Global ESC key listener to return to WORLD view
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && activeNodeId) {
+        setActiveNodeId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeNodeId]);
 
   return (
