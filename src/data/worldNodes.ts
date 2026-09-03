@@ -1,4 +1,77 @@
-import type { WorldNode, WorldTopologyEdge } from '../types/portfolio';
+import type { WorldNode, WorldTopologyEdge, RegionEnvironmentConfig, RegionId } from '../types/portfolio';
+
+export const REGION_ENVIRONMENTS: Record<RegionId, RegionEnvironmentConfig> = {
+  identity: {
+    geometryType: 'organic_core',
+    particleDensity: 120,
+    connectionDensity: 0.3,
+    motionSpeed: 0.5,
+    atmosphereFogDensity: 0.035,
+    atmosphereColorHex: 0x031322,
+    structuralScale: 1.2,
+    accentColorHex: 0x00e5ff
+  },
+  systems: {
+    geometryType: 'architectural_cube',
+    particleDensity: 200,
+    connectionDensity: 0.8,
+    motionSpeed: 1.0,
+    atmosphereFogDensity: 0.045,
+    atmosphereColorHex: 0x020d20,
+    structuralScale: 1.4,
+    accentColorHex: 0x3b82f6
+  },
+  neural_core: {
+    geometryType: 'neural_network',
+    particleDensity: 320,
+    connectionDensity: 1.5,
+    motionSpeed: 1.6,
+    atmosphereFogDensity: 0.05,
+    atmosphereColorHex: 0x140520,
+    structuralScale: 1.5,
+    accentColorHex: 0xa855f7
+  },
+  project_labs: {
+    geometryType: 'modular_labs',
+    particleDensity: 240,
+    connectionDensity: 1.0,
+    motionSpeed: 1.2,
+    atmosphereFogDensity: 0.04,
+    atmosphereColorHex: 0x021f15,
+    structuralScale: 1.3,
+    accentColorHex: 0x10b981
+  },
+  workstation: {
+    geometryType: 'operational_gear',
+    particleDensity: 180,
+    connectionDensity: 0.7,
+    motionSpeed: 0.9,
+    atmosphereFogDensity: 0.042,
+    atmosphereColorHex: 0x1f1402,
+    structuralScale: 1.35,
+    accentColorHex: 0xf59e0b
+  },
+  archive: {
+    geometryType: 'data_monolith',
+    particleDensity: 160,
+    connectionDensity: 0.5,
+    motionSpeed: 0.6,
+    atmosphereFogDensity: 0.045,
+    atmosphereColorHex: 0x1d0515,
+    structuralScale: 1.25,
+    accentColorHex: 0xec4899
+  },
+  communication_hub: {
+    geometryType: 'beacon_gateway',
+    particleDensity: 220,
+    connectionDensity: 1.2,
+    motionSpeed: 1.4,
+    atmosphereFogDensity: 0.038,
+    atmosphereColorHex: 0x021b18,
+    structuralScale: 1.4,
+    accentColorHex: 0x14b8a6
+  }
+};
 
 export const WORLD_TOPOLOGY_EDGES: WorldTopologyEdge[] = [
   { from: 'communication_hub', to: 'identity', pulseSpeed: 1.2 },

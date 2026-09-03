@@ -69,14 +69,11 @@ elvis-os: Interactive 3D computational portfolio world built with React, TypeScr
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 sm:p-6 bg-slate-950/70 backdrop-blur-md font-mono transition-all animate-fadeIn">
-      {/* Overlay Backdrop */}
-      <div className="absolute inset-0" onClick={() => { playClickSound(700, 0.02); onClose(); }} />
-
-      {/* Main Drawer Container */}
+    <div className="fixed top-16 right-3 sm:right-6 bottom-16 z-40 w-full max-w-lg sm:max-w-xl flex flex-col pointer-events-auto font-mono transition-all animate-slideInRight">
+      {/* Information Panel Overlay Container - 3D Environment visible behind & around */}
       <div
-        className="relative z-10 w-full max-w-3xl max-h-[85vh] glass-panel-accent rounded-lg p-6 sm:p-8 flex flex-col shadow-2xl border border-cyan-500/30 overflow-hidden"
-        style={{ borderTopColor: node.color }}
+        className="relative z-10 w-full h-full glass-panel-accent rounded-xl p-5 sm:p-6 flex flex-col shadow-2xl border border-cyan-500/30 overflow-hidden backdrop-blur-md bg-slate-950/85"
+        style={{ borderTopColor: node.color, borderTopWidth: '3px' }}
       >
         {/* Header Navigation */}
         <div className="flex items-center justify-between pb-4 border-b border-white/10">

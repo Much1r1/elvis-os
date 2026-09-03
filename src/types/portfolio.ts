@@ -73,8 +73,22 @@ export interface WorldNode {
   };
 }
 
+export type TravelPhase = 'idle' | 'traveling' | 'entered';
+
+export interface RegionEnvironmentConfig {
+  geometryType: string;
+  particleDensity: number;
+  connectionDensity: number;
+  motionSpeed: number;
+  atmosphereFogDensity: number;
+  atmosphereColorHex: number;
+  structuralScale: number;
+  accentColorHex: number;
+}
+
 export interface SystemStatus {
   activeNode: RegionId | null;
+  travelPhase: TravelPhase;
   bootSequenceComplete: boolean;
   audioMuted: boolean;
   commandPaletteOpen: boolean;
