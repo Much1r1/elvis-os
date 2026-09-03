@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Terminal, Shield, Cpu, Activity, Play } from 'lucide-react';
 import { playClickSound } from '../utils/audio';
 
@@ -23,6 +23,15 @@ export function SystemBootSequence({ onBootComplete }: SystemBootSequenceProps) 
   const [visibleLogs, setVisibleLogs] = useState<number>(0);
   const [progress, setProgress] = useState<number>(0);
   const [isExiting, setIsExiting] = useState<boolean>(false);
+
+  const handleComplete = useCallback(() => {
+    if (isExiting) return;
+    setIsExiting(true);
+    playClickSound(1200, 0.05);
+    setTimeout(() => {
+      onBootComplete();
+    }, 600);
+  }, [isExiting, onBootComplete]);
 
   useEffect(() => {
     // Log items revealing
@@ -57,16 +66,7 @@ export function SystemBootSequence({ onBootComplete }: SystemBootSequenceProps) 
       clearInterval(progressInterval);
       clearTimeout(autoFinishTimer);
     };
-  }, []);
-
-  const handleComplete = () => {
-    if (isExiting) return;
-    setIsExiting(true);
-    playClickSound(1200, 0.05);
-    setTimeout(() => {
-      onBootComplete();
-    }, 600);
-  };
+  }, [handleComplete]);
 
   return (
     <div

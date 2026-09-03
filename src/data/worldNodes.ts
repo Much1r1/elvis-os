@@ -1,4 +1,17 @@
-import type { WorldNode } from '../types/portfolio';
+import type { WorldNode, WorldTopologyEdge } from '../types/portfolio';
+
+export const WORLD_TOPOLOGY_EDGES: WorldTopologyEdge[] = [
+  { from: 'communication_hub', to: 'identity', pulseSpeed: 1.2 },
+  { from: 'communication_hub', to: 'systems', pulseSpeed: 1.4 },
+  { from: 'identity', to: 'systems', pulseSpeed: 1.0 },
+  { from: 'identity', to: 'neural_core', pulseSpeed: 1.5 },
+  { from: 'systems', to: 'neural_core', pulseSpeed: 1.3 },
+  { from: 'neural_core', to: 'project_labs', pulseSpeed: 1.6 },
+  { from: 'neural_core', to: 'workstation', pulseSpeed: 1.2 },
+  { from: 'project_labs', to: 'workstation', pulseSpeed: 0.9 },
+  { from: 'project_labs', to: 'archive', pulseSpeed: 1.1 },
+  { from: 'workstation', to: 'archive', pulseSpeed: 1.0 },
+];
 
 export const WORLD_NODES: WorldNode[] = [
   {
@@ -6,9 +19,10 @@ export const WORLD_NODES: WorldNode[] = [
     title: 'IDENTITY',
     code: 'SYS.ID.01',
     shortDesc: 'Engineering philosophy, background, and digital identity core.',
-    position: { x: 0, y: 1.2, z: 0 },
+    position: { x: -2.6, y: 1.2, z: 0 },
     color: '#00e5ff', // Ice Cyan
     iconName: 'User',
+    landmarkType: 'organic_core',
     items: [
       {
         title: 'Elvis Muchiri',
@@ -47,9 +61,10 @@ export const WORLD_NODES: WorldNode[] = [
     title: 'SYSTEMS',
     code: 'SYS.ENG.02',
     shortDesc: 'Backend architecture, reactive frontends, and cloud infrastructure.',
-    position: { x: -3.2, y: 0.5, z: -1.5 },
+    position: { x: 2.6, y: 1.2, z: -0.5 },
     color: '#3b82f6', // Electric Blue
     iconName: 'Cpu',
+    landmarkType: 'architectural_cube',
     items: [
       {
         title: 'Core Stack & Frameworks',
@@ -93,9 +108,10 @@ export class SystemEventPipe<T> {
     title: 'NEURAL CORE',
     code: 'SYS.AI.03',
     shortDesc: 'LLM agents, vector embeddings, fine-tuning, and ML pipelines.',
-    position: { x: 3.2, y: 0.8, z: -1.2 },
+    position: { x: 0, y: 0.2, z: 0.5 },
     color: '#a855f7', // Deep Purple
     iconName: 'Brain',
+    landmarkType: 'neural_network',
     items: [
       {
         title: 'Autonomous AI Agents & RAG Architecture',
@@ -130,9 +146,10 @@ export class SystemEventPipe<T> {
     title: 'PROJECT LABS',
     code: 'SYS.LAB.04',
     shortDesc: 'Interactive software environments and system demonstrations.',
-    position: { x: -2.2, y: -2.0, z: 1.0 },
+    position: { x: -2.8, y: -1.8, z: 1.0 },
     color: '#10b981', // Emerald Green
     iconName: 'Layers',
+    landmarkType: 'modular_labs',
     items: [
       {
         title: 'Project Kijiji',
@@ -181,9 +198,10 @@ export class SystemEventPipe<T> {
     title: 'WORKSTATION',
     code: 'SYS.EXP.05',
     shortDesc: 'Professional experience, production achievements, and systems built.',
-    position: { x: 2.2, y: -1.8, z: 0.8 },
+    position: { x: 2.8, y: -1.8, z: 0.8 },
     color: '#f59e0b', // Amber / Gold
     iconName: 'Briefcase',
+    landmarkType: 'operational_gear',
     items: [
       {
         title: 'Vetted',
@@ -219,6 +237,7 @@ export class SystemEventPipe<T> {
     position: { x: 0, y: -2.8, z: -1.0 },
     color: '#ec4899', // Pink Accent
     iconName: 'FileText',
+    landmarkType: 'data_monolith',
     items: [
       {
         title: 'Curriculum Vitae',
@@ -249,9 +268,10 @@ export class SystemEventPipe<T> {
     title: 'COMMUNICATION HUB',
     code: 'SYS.COM.07',
     shortDesc: 'Direct channels, GitHub repositories, and network connections.',
-    position: { x: 0, y: 3.0, z: -2.0 },
+    position: { x: 0, y: 3.2, z: -2.0 },
     color: '#14b8a6', // Teal
     iconName: 'Share2',
+    landmarkType: 'beacon_gateway',
     items: [
       {
         title: 'Direct Communication Pathways',

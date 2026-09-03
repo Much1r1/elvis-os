@@ -40,6 +40,21 @@ export interface KnowledgeQA {
   tags: string[];
 }
 
+export type RegionLandmarkType =
+  | 'organic_core'
+  | 'architectural_cube'
+  | 'neural_network'
+  | 'modular_labs'
+  | 'operational_gear'
+  | 'data_monolith'
+  | 'beacon_gateway';
+
+export interface WorldTopologyEdge {
+  from: RegionId;
+  to: RegionId;
+  pulseSpeed?: number;
+}
+
 export interface WorldNode {
   id: RegionId;
   title: string;
@@ -48,6 +63,7 @@ export interface WorldNode {
   position: SpatialCoordinates;
   color: string; // HEX or RGB string
   iconName: string;
+  landmarkType: RegionLandmarkType;
   items: PortfolioItem[];
   knowledge: KnowledgeQA[];
   // Special interactive dataset for nodes like PROJECT LABS
