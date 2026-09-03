@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
-import type { RegionId, WorldNode, RegionLandmarkType } from '../types/portfolio';
+import type { RegionId, WorldNode, RegionLandmarkType, TravelPhase } from '../types/portfolio';
 import { WORLD_TOPOLOGY_EDGES } from '../data/worldNodes';
 import { playClickSound } from '../utils/audio';
 
 interface WorldCanvasProps {
   nodes: WorldNode[];
   activeNodeId: RegionId | null;
+  travelPhase?: TravelPhase;
   onSelectNode: (id: RegionId | null) => void;
   hoveredNodeId: RegionId | null;
   onHoverNode: (id: RegionId | null) => void;
@@ -228,6 +229,231 @@ function createRegionLandmark(landmarkType: RegionLandmarkType, colorHex: number
   return group;
 }
 
+// Helper to construct region-specific environmental identity layers
+function createRegionEnvironmentGroup(regionId: RegionId, colorHex: number): THREE.Group {
+  const envGroup = new THREE.Group();
+  envGroup.name = 'envGroup';
+  envGroup.visible = false;
+  envGroup.scale.set(0.001, 0.001, 0.001);
+
+  switch (regionId) {
+    case 'identity': {
+      // IDENTITY: Origin/Core - Calm, smooth orbital rings & floating core particles
+      const ringGeo1 = new THREE.TorusGeometry(1.2, 0.01, 16, 64);
+      const ringMat1 = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.4 });
+      const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
+      ring1.name = 'envRing1';
+      ring1.rotation.x = Math.PI / 4;
+      envGroup.add(ring1);
+
+      const ringGeo2 = new THREE.TorusGeometry(1.8, 0.008, 16, 64);
+      const ringMat2 = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.25 });
+      const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
+      ring2.name = 'envRing2';
+      ring2.rotation.y = Math.PI / 3;
+      envGroup.add(ring2);
+
+      // Floating core particles orbiting in space
+      const particlesGroup = new THREE.Group();
+      particlesGroup.name = 'envParticles';
+      const particleGeo = new THREE.SphereGeometry(0.025, 8, 8);
+      const particleMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.8 });
+
+      for (let i = 0; i < 20; i++) {
+        const p = new THREE.Mesh(particleGeo, particleMat);
+        const radius = 0.8 + Math.random() * 1.2;
+        const angle = (i / 20) * Math.PI * 2;
+        p.position.set(Math.cos(angle) * radius, (Math.random() - 0.5) * 0.8, Math.sin(angle) * radius);
+        particlesGroup.add(p);
+      }
+      envGroup.add(particlesGroup);
+      break;
+    }
+
+    case 'systems': {
+      // SYSTEMS: Engineered - Structured architectural wireframe grid & modular conduits
+      const boxGrid = new THREE.Group();
+      boxGrid.name = 'envGrid';
+      const lineMat = new THREE.LineBasicMaterial({ color: colorHex, transparent: true, opacity: 0.25 });
+
+      // Architectural grid wireframe
+      const gridGeo = new THREE.BoxGeometry(2.4, 2.4, 2.4);
+      const wireframeGeo = new THREE.WireframeGeometry(gridGeo);
+      const gridLines = new THREE.LineSegments(wireframeGeo, lineMat);
+      boxGrid.add(gridLines);
+
+      // Floating module blocks at grid corners
+      const moduleGeo = new THREE.BoxGeometry(0.18, 0.18, 0.18);
+      const moduleMat = new THREE.MeshBasicMaterial({ color: colorHex, wireframe: true });
+      const corners = [
+        [-1.2, -1.2, -1.2], [1.2, -1.2, -1.2], [-1.2, 1.2, -1.2], [1.2, 1.2, -1.2],
+        [-1.2, -1.2, 1.2], [1.2, -1.2, 1.2], [-1.2, 1.2, 1.2], [1.2, 1.2, 1.2]
+      ];
+      corners.forEach(([x, y, z]) => {
+        const mod = new THREE.Mesh(moduleGeo, moduleMat);
+        mod.position.set(x, y, z);
+        boxGrid.add(mod);
+      });
+
+      envGroup.add(boxGrid);
+      break;
+    }
+
+    case 'neural_core': {
+      // NEURAL CORE: AI - Dense synaptic neural network mesh with dynamic signals
+      const neuralGroup = new THREE.Group();
+      neuralGroup.name = 'envNeural';
+
+      const count = 14;
+      const nodes: THREE.Vector3[] = [];
+      const satGeo = new THREE.SphereGeometry(0.05, 12, 12);
+      const satMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.85 });
+
+      for (let i = 0; i < count; i++) {
+        const phi = Math.acos(-1 + (2 * i) / count);
+        const theta = Math.sqrt(count * Math.PI) * phi;
+        const radius = 1.1 + (i % 3) * 0.25;
+        const pos = new THREE.Vector3(
+          radius * Math.cos(theta) * Math.sin(phi),
+          radius * Math.sin(theta) * Math.sin(phi),
+          radius * Math.cos(phi)
+        );
+        nodes.push(pos);
+
+        const nodeMesh = new THREE.Mesh(satGeo, satMat);
+        nodeMesh.position.copy(pos);
+        neuralGroup.add(nodeMesh);
+      }
+
+      // Connect neural synapse lines
+      const linePoints: THREE.Vector3[] = [];
+      for (let i = 0; i < count; i++) {
+        for (let j = i + 1; j < count; j++) {
+          if (nodes[i].distanceTo(nodes[j]) < 1.6) {
+            linePoints.push(nodes[i]);
+            linePoints.push(nodes[j]);
+          }
+        }
+      }
+
+      const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
+      const lineMat = new THREE.LineBasicMaterial({ color: colorHex, transparent: true, opacity: 0.35 });
+      const lineMesh = new THREE.LineSegments(lineGeo, lineMat);
+      neuralGroup.add(lineMesh);
+
+      envGroup.add(neuralGroup);
+      break;
+    }
+
+    case 'project_labs': {
+      // PROJECT LABS: Experimental - Multiple contained computational objects / microservices
+      const labGroup = new THREE.Group();
+      labGroup.name = 'envLabs';
+
+      const podNames = ['API Gateway', 'Auth Service', 'Commerce Engine', 'Neural AI', 'Vector DB', 'Redis Mesh'];
+      const podGeo = new THREE.OctahedronGeometry(0.18);
+      const podMat = new THREE.MeshBasicMaterial({ color: colorHex, wireframe: true });
+
+      const podPoints: THREE.Vector3[] = [];
+      podNames.forEach((_, idx) => {
+        const angle = (idx / podNames.length) * Math.PI * 2;
+        const radius = 1.3;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        const y = Math.sin(angle * 2) * 0.35;
+
+        const pod = new THREE.Mesh(podGeo, podMat);
+        pod.position.set(x, y, z);
+        labGroup.add(pod);
+
+        podPoints.push(new THREE.Vector3(0, 0, 0));
+        podPoints.push(new THREE.Vector3(x, y, z));
+      });
+
+      const lineGeo = new THREE.BufferGeometry().setFromPoints(podPoints);
+      const lineMat = new THREE.LineBasicMaterial({ color: colorHex, transparent: true, opacity: 0.3 });
+      const lines = new THREE.LineSegments(lineGeo, lineMat);
+      labGroup.add(lines);
+
+      envGroup.add(labGroup);
+      break;
+    }
+
+    case 'workstation': {
+      // WORKSTATION: Operational - Nested precision gear reticles & execution trace frames
+      const gearGroup = new THREE.Group();
+      gearGroup.name = 'envGears';
+
+      const gearGeo1 = new THREE.TorusGeometry(1.2, 0.02, 8, 32);
+      const gearMat1 = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.5 });
+      const g1 = new THREE.Mesh(gearGeo1, gearMat1);
+      g1.name = 'gearOuter';
+      g1.rotation.x = Math.PI / 2;
+      gearGroup.add(g1);
+
+      const gearGeo2 = new THREE.TorusGeometry(1.6, 0.015, 6, 24);
+      const gearMat2 = new THREE.MeshBasicMaterial({ color: colorHex, wireframe: true });
+      const g2 = new THREE.Mesh(gearGeo2, gearMat2);
+      g2.name = 'gearInner';
+      g2.rotation.y = Math.PI / 3;
+      gearGroup.add(g2);
+
+      envGroup.add(gearGroup);
+      break;
+    }
+
+    case 'archive': {
+      // ARCHIVE: Repository / Monolith - Stacked data platters & vertical document planes
+      const archiveGroup = new THREE.Group();
+      archiveGroup.name = 'envArchive';
+
+      const platterGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.02, 32);
+      const platterMat = new THREE.MeshBasicMaterial({ color: colorHex, wireframe: true });
+
+      [-0.6, 0, 0.6].forEach(y => {
+        const platter = new THREE.Mesh(platterGeo, platterMat);
+        platter.position.y = y;
+        archiveGroup.add(platter);
+      });
+
+      // Translucent vertical document planes
+      const docGeo = new THREE.PlaneGeometry(0.8, 1.2);
+      const docMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.25, side: THREE.DoubleSide, wireframe: true });
+      for (let i = 0; i < 4; i++) {
+        const doc = new THREE.Mesh(docGeo, docMat);
+        const angle = (i / 4) * Math.PI * 2;
+        doc.position.set(Math.cos(angle) * 0.9, 0, Math.sin(angle) * 0.9);
+        doc.rotation.y = -angle;
+        archiveGroup.add(doc);
+      }
+
+      envGroup.add(archiveGroup);
+      break;
+    }
+
+    case 'communication_hub': {
+      // COMMUNICATION HUB: Gateway / Beacon - Concentric expanding transmission radio waves
+      const hubGroup = new THREE.Group();
+      hubGroup.name = 'envBeacon';
+
+      const waveCount = 4;
+      for (let i = 0; i < waveCount; i++) {
+        const waveGeo = new THREE.RingGeometry(0.6 + i * 0.4, 0.63 + i * 0.4, 32);
+        const waveMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.5 - i * 0.1, side: THREE.DoubleSide });
+        const wave = new THREE.Mesh(waveGeo, waveMat);
+        wave.name = `wave_${i}`;
+        wave.rotation.x = Math.PI / 2;
+        hubGroup.add(wave);
+      }
+
+      envGroup.add(hubGroup);
+      break;
+    }
+  }
+
+  return envGroup;
+}
+
 export function WorldCanvas({
   nodes,
   activeNodeId,
@@ -370,6 +596,11 @@ export function WorldCanvas({
     nodes.forEach(node => {
       const colorHex = parseInt(node.color.replace('#', '0x'), 16);
       const group = createRegionLandmark(node.landmarkType, colorHex);
+
+      // Attach region-specific environment identity layer
+      const envGroup = createRegionEnvironmentGroup(node.id, colorHex);
+      group.add(envGroup);
+
       const pos = new THREE.Vector3(node.position.x, node.position.y, node.position.z);
       group.position.copy(pos);
       group.userData = { nodeId: node.id, colorHex };
@@ -442,43 +673,75 @@ export function WorldCanvas({
         scene.fog.density = THREE.MathUtils.lerp(scene.fog.density, targetDensity, 0.05);
       }
 
-      // Animate Region Landmark Motions
+      // Animate Region Landmark Motions & Environmental Identity
       nodeMap.forEach((group, id) => {
         const isHovered = hoveredNodeId === id;
         const isActive = activeNodeId === id;
 
-        // Landmark specific internal rotations
+        // Landmark specific internal rotations (speed up on active travel/entry)
+        const rotMultiplier = isActive ? 2.2 : 1.0;
+
         const ring1 = group.getObjectByName('ring1');
-        if (ring1) ring1.rotation.z = time * 0.5;
+        if (ring1) ring1.rotation.z = time * 0.5 * rotMultiplier;
 
         const ring2 = group.getObjectByName('ring2');
-        if (ring2) ring2.rotation.x = time * 0.4;
+        if (ring2) ring2.rotation.x = time * 0.4 * rotMultiplier;
 
         const coreShape = group.getObjectByName('coreShape');
-        if (coreShape) coreShape.rotation.y = time * 0.3;
+        if (coreShape) coreShape.rotation.y = time * 0.3 * rotMultiplier;
 
         const synapses = group.getObjectByName('synapses');
-        if (synapses) synapses.rotation.z = -time * 0.3;
+        if (synapses) synapses.rotation.z = -time * 0.3 * rotMultiplier;
 
         const blocks = group.getObjectByName('blocks');
-        if (blocks) blocks.rotation.y = time * 0.25;
+        if (blocks) blocks.rotation.y = time * 0.25 * rotMultiplier;
 
         const platters = group.getObjectByName('platters');
-        if (platters) platters.rotation.y = -time * 0.2;
+        if (platters) platters.rotation.y = -time * 0.2 * rotMultiplier;
 
         // Float motion offset
         const initialY = nodes.find(n => n.id === id)?.position.y ?? 0;
         group.position.y = initialY + Math.sin(time * 1.5 + group.position.x * 2) * 0.07;
 
-        // Scale & Opacity Lerp on hover or selection
+        // Scale Lerp on selection or hover
         let targetScale = 1.0;
         if (activeNodeId) {
-          targetScale = isActive ? 1.25 : 0.65;
+          targetScale = isActive ? 1.35 : 0.35; // Bright highlight on active, reduce unrelated nodes
         } else if (isHovered) {
           targetScale = 1.18;
         }
 
         group.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
+
+        // Region Environmental Identity Layer Animation
+        const envGroup = group.getObjectByName('envGroup');
+        if (envGroup) {
+          if (isActive) {
+            envGroup.visible = true;
+            envGroup.scale.lerp(new THREE.Vector3(1, 1, 1), 0.08);
+            envGroup.rotation.y = time * 0.25;
+
+            const envGears = envGroup.getObjectByName('envGears');
+            if (envGears) {
+              const outer = envGears.getObjectByName('gearOuter');
+              if (outer) outer.rotation.z = time * 0.8;
+              const inner = envGears.getObjectByName('gearInner');
+              if (inner) inner.rotation.x = -time * 0.6;
+            }
+
+            const envBeacon = envGroup.getObjectByName('envBeacon');
+            if (envBeacon) {
+              envBeacon.children.forEach((child, idx) => {
+                child.scale.setScalar(1 + (Math.sin(time * 2 + idx) + 1) * 0.12);
+              });
+            }
+          } else {
+            envGroup.scale.lerp(new THREE.Vector3(0.001, 0.001, 0.001), 0.1);
+            if (envGroup.scale.x < 0.01) {
+              envGroup.visible = false;
+            }
+          }
+        }
       });
 
       // Animate Topology Live Data Pulses

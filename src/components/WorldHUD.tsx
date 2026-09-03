@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { RegionId, WorldNode } from '../types/portfolio';
+import type { RegionId, WorldNode, TravelPhase } from '../types/portfolio';
 import {
   Volume2,
   VolumeX,
@@ -16,6 +16,7 @@ import { toggleAmbientDrone, playClickSound } from '../utils/audio';
 
 interface WorldHUDProps {
   activeNode: WorldNode | null;
+  travelPhase?: TravelPhase;
   onClearActiveNode: () => void;
   nodes: WorldNode[];
   onSelectNode: (id: RegionId) => void;
