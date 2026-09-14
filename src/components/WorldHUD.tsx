@@ -13,6 +13,7 @@ import {
   Globe2
 } from 'lucide-react';
 import { toggleAmbientDrone, playClickSound } from '../utils/audio';
+import { IDENTITY_DATA, PROJECTS_DATA, EXPERIENCE_DATA, SKILLS_DATA, EDUCATION_DATA, ACHIEVEMENTS_DATA } from '../data/portfolio';
 
 interface WorldHUDProps {
   activeNode: WorldNode | null;
@@ -70,7 +71,45 @@ export function WorldHUD({
 
   const handleDownloadCV = () => {
     playClickSound(1000, 0.04);
-    const cvContent = `ELVIS MUCHIRI - CV Summary\nEmail: contact@elvismuchiri.com\nSoftware Engineer & AI Systems Architect.`;
+    const cvContent = `==================================================
+${IDENTITY_DATA.name.toUpperCase()}
+${IDENTITY_DATA.title}
+Location: ${IDENTITY_DATA.location}
+Email: ${IDENTITY_DATA.email}
+GitHub: ${IDENTITY_DATA.github}
+LinkedIn: ${IDENTITY_DATA.linkedin}
+Portfolio: ${IDENTITY_DATA.portfolio}
+==================================================
+
+CAREER SUMMARY:
+${IDENTITY_DATA.narrative}
+
+TECHNICAL PROFICIENCY:
+${SKILLS_DATA.map(cat => `[${cat.category}]\n${cat.skills.map(s => `  - ${s.name}: ${s.context || ''}`).join('\n')}`).join('\n\n')}
+
+PROFESSIONAL EXPERIENCE:
+${EXPERIENCE_DATA.map(e => `${e.role} | ${e.company} (${e.period})
+Scope: ${e.scope}
+Responsibilities:
+${e.responsibilities.map(r => `  - ${r}`).join('\n')}
+Achievements:
+${e.achievements.map(a => `  - ${a}`).join('\n')}`).join('\n\n')}
+
+KEY PROJECTS & RESEARCH:
+${PROJECTS_DATA.map(p => `${p.name} (${p.category}) - ${p.status}
+One-liner: ${p.oneLiner}
+Problem: ${p.problem}
+Approach: ${p.approach}
+Technologies: ${p.technologies.join(', ')}`).join('\n\n')}
+
+EDUCATION:
+Degree: ${EDUCATION_DATA.degree}
+Institution: ${EDUCATION_DATA.institution} (${EDUCATION_DATA.graduation})
+
+ACHIEVEMENT BANK:
+${ACHIEVEMENTS_DATA.map(a => `  - [${a.category.toUpperCase()}] ${a.text}`).join('\n')}
+`;
+
     const blob = new Blob([cvContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
