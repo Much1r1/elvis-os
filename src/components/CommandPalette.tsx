@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { RegionId, WorldNode } from '../types/portfolio';
 import { Search, Terminal, ArrowRight, X, Sparkles, Download, Shield } from 'lucide-react';
 import { playClickSound } from '../utils/audio';
+import { IDENTITY_DATA, PROJECTS_DATA, EXPERIENCE_DATA, SKILLS_DATA, EDUCATION_DATA, ACHIEVEMENTS_DATA } from '../data/portfolio';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -51,8 +52,8 @@ export function CommandPalette({ isOpen, onClose, nodes, onSelectNode }: Command
     setQuery(val);
     setAiAnswer(null);
 
-    // AI agent simulated response if user asks a direct question
-    if (val.trim().endsWith('?') || val.toLowerCase().includes('what') || val.toLowerCase().includes('who') || val.toLowerCase().includes('cv')) {
+    // AI agent response if user asks a question
+    if (val.trim().endsWith('?') || val.toLowerCase().includes('what') || val.toLowerCase().includes('who') || val.toLowerCase().includes('cv') || val.toLowerCase().includes('kijiji')) {
       const match = allKnowledge.find(k => val.toLowerCase().split(' ').some(w => w.length > 3 && k.question.toLowerCase().includes(w)));
       if (match) {
         setAiAnswer(match.answer);
@@ -68,7 +69,45 @@ export function CommandPalette({ isOpen, onClose, nodes, onSelectNode }: Command
 
   const handleDownloadCV = () => {
     playClickSound(1000, 0.04);
-    const cvContent = `ELVIS MUCHIRI - CV Summary\nEmail: contact@elvismuchiri.com\nSoftware Engineer & AI Systems Architect.`;
+    const cvContent = `==================================================
+${IDENTITY_DATA.name.toUpperCase()}
+${IDENTITY_DATA.title}
+Location: ${IDENTITY_DATA.location}
+Email: ${IDENTITY_DATA.email}
+GitHub: ${IDENTITY_DATA.github}
+LinkedIn: ${IDENTITY_DATA.linkedin}
+Portfolio: ${IDENTITY_DATA.portfolio}
+==================================================
+
+CAREER SUMMARY:
+${IDENTITY_DATA.narrative}
+
+TECHNICAL PROFICIENCY:
+${SKILLS_DATA.map(cat => `[${cat.category}]\n${cat.skills.map(s => `  - ${s.name}: ${s.context || ''}`).join('\n')}`).join('\n\n')}
+
+PROFESSIONAL EXPERIENCE:
+${EXPERIENCE_DATA.map(e => `${e.role} | ${e.company} (${e.period})
+Scope: ${e.scope}
+Responsibilities:
+${e.responsibilities.map(r => `  - ${r}`).join('\n')}
+Achievements:
+${e.achievements.map(a => `  - ${a}`).join('\n')}`).join('\n\n')}
+
+KEY PROJECTS & RESEARCH:
+${PROJECTS_DATA.map(p => `${p.name} (${p.category}) - ${p.status}
+One-liner: ${p.oneLiner}
+Problem: ${p.problem}
+Approach: ${p.approach}
+Technologies: ${p.technologies.join(', ')}`).join('\n\n')}
+
+EDUCATION:
+Degree: ${EDUCATION_DATA.degree}
+Institution: ${EDUCATION_DATA.institution} (${EDUCATION_DATA.graduation})
+
+ACHIEVEMENT BANK:
+${ACHIEVEMENTS_DATA.map(a => `  - [${a.category.toUpperCase()}] ${a.text}`).join('\n')}
+`;
+
     const blob = new Blob([cvContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -93,7 +132,7 @@ export function CommandPalette({ isOpen, onClose, nodes, onSelectNode }: Command
             type="text"
             value={query}
             onChange={handleQueryChange}
-            placeholder="Type a region name or question (e.g., 'What has Elvis built?')..."
+            placeholder="Search regions or ask a question (e.g. 'What has Elvis built?')..."
             autoFocus
             className="w-full bg-transparent text-sm text-slate-100 focus:outline-none placeholder-slate-500 font-mono"
           />
@@ -110,7 +149,7 @@ export function CommandPalette({ isOpen, onClose, nodes, onSelectNode }: Command
           <div className="p-3 rounded bg-cyan-950/40 border border-cyan-500/30 flex items-start gap-2 text-xs">
             <Sparkles className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5 animate-pulse" />
             <div>
-              <span className="font-bold text-cyan-300 block mb-0.5">ELVIS.OS NEURAL QUERY ENGINE:</span>
+              <span className="font-bold text-cyan-300 block mb-0.5">ELVIS.OS KNOWLEDGE ENGINE:</span>
               <p className="text-slate-200 leading-relaxed">{aiAnswer}</p>
             </div>
           </div>

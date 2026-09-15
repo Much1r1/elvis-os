@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import type { WorldNode } from '../types/portfolio';
 import { KijijiMeshVisualizer } from './KijijiMeshVisualizer';
-import { X, ExternalLink, Download, Code2, Cpu, Check } from 'lucide-react';
+import { X, ExternalLink, Download, Code2, Cpu, Check, Star } from 'lucide-react';
 import { playClickSound } from '../utils/audio';
+import { IDENTITY_DATA, PROJECTS_DATA, EXPERIENCE_DATA, SKILLS_DATA, EDUCATION_DATA, ACHIEVEMENTS_DATA } from '../data/portfolio';
 
 interface SystemNodeModalProps {
   node: WorldNode | null;
@@ -23,45 +24,61 @@ export function SystemNodeModal({ node, onClose }: SystemNodeModalProps) {
 
   if (!node) return null;
 
-  const handleDownloadCV = () => {
+  const generateCVText = (variantId?: string) => {
+    const header = `==================================================
+${IDENTITY_DATA.name.toUpperCase()}
+${IDENTITY_DATA.title}
+Location: ${IDENTITY_DATA.location}
+Email: ${IDENTITY_DATA.email}
+GitHub: ${IDENTITY_DATA.github}
+LinkedIn: ${IDENTITY_DATA.linkedin}
+Portfolio: ${IDENTITY_DATA.portfolio}
+==================================================\n\n`;
+
+    const summary = `CAREER SUMMARY:
+${IDENTITY_DATA.narrative}\n\n`;
+
+    const skillsStr = `TECHNICAL PROFICIENCY:
+${SKILLS_DATA.map(cat => `[${cat.category}]\n${cat.skills.map(s => `  - ${s.name}: ${s.context || ''}`).join('\n')}`).join('\n\n')}\n\n`;
+
+    const expStr = `PROFESSIONAL EXPERIENCE:
+${EXPERIENCE_DATA.map(e => `${e.role} | ${e.company} (${e.period})
+Location: ${e.location}
+Scope: ${e.scope}
+Responsibilities:
+${e.responsibilities.map(r => `  - ${r}`).join('\n')}
+Verified Achievements:
+${e.achievements.map(a => `  - ${a}`).join('\n')}`).join('\n\n')}\n\n`;
+
+    const projStr = `KEY PROJECTS & RESEARCH:
+${PROJECTS_DATA.map(p => `${p.name} (${p.category}) - ${p.status}
+One-liner: ${p.oneLiner}
+Problem: ${p.problem}
+Approach: ${p.approach}
+Technologies: ${p.technologies.join(', ')}
+Results: ${p.results.map(r => `${r.label}: ${r.value}`).join(' | ')}`).join('\n\n')}\n\n`;
+
+    const eduStr = `EDUCATION & CREDENTIALS:
+Degree: ${EDUCATION_DATA.degree}
+Institution: ${EDUCATION_DATA.institution} (${EDUCATION_DATA.graduation})
+Status: ${EDUCATION_DATA.status}
+Graduate Ambitions: ${EDUCATION_DATA.ambitions.program} (${EDUCATION_DATA.ambitions.target})\n\n`;
+
+    const achStr = `QUANTIFIED ACHIEVEMENTS BANK:
+${ACHIEVEMENTS_DATA.map(a => `  - [${a.category.toUpperCase()}] ${a.text}`).join('\n')}\n\n`;
+
+    return `${header}${summary}${skillsStr}${expStr}${projStr}${eduStr}${achStr}Profile Variant: ${variantId || 'General Full Portfolio'}\nGenerated via ELVIS.OS`;
+  };
+
+  const handleDownloadCV = (variantId?: string) => {
     playClickSound(1000, 0.04);
-    // Generate a clean text CV summary download
-    const cvContent = `ELVIS MUCHIRI
-Software Engineer & AI Systems Architect
-Email: contact@elvismuchiri.com | GitHub: github.com | LinkedIn: linkedin.com
-
-==================================================
-SUMMARY
-==================================================
-Software Engineer specializing in distributed systems, autonomous AI agents, and reactive full-stack web applications. Built high-impact production systems at Vetted and interactive computational tools.
-
-==================================================
-CORE TECHNICAL STACK
-==================================================
-Languages: TypeScript, JavaScript, Python, Rust, SQL
-Frontend: React, Next.js, Vite, Three.js, Tailwind CSS, WebAudio
-Backend: Node.js, Express, FastAPI, PostgreSQL, Redis, Docker
-AI / ML: Vector DBs (Pinecone/Qdrant/PGVector), LangChain, LlamaIndex, OpenAI, PyTorch
-
-==================================================
-EXPERIENCE
-==================================================
-Software Engineer | Vetted
-- Engineered scalable microservices, high-throughput APIs, and responsive web products.
-- Built automated AI retrieval workflows and resilient cloud infrastructure.
-
-==================================================
-KEY PROJECTS
-==================================================
-Project Kijiji: Distributed community commerce microservice mesh with real-time inventory synchronization.
-elvis-os: Interactive 3D computational portfolio world built with React, TypeScript, and Three.js.
-`;
-
-    const blob = new Blob([cvContent], { type: 'text/plain;charset=utf-8' });
+    const content = generateCVText(variantId);
+    const filename = variantId ? `Elvis_Muchiri_CV_${variantId}.txt` : 'Elvis_Muchiri_CV.txt';
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'Elvis_Muchiri_CV.txt';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -109,9 +126,17 @@ elvis-os: Interactive 3D computational portfolio world built with React, TypeScr
           {/* Items / Systems details */}
           <div className="space-y-6">
             {node.items.map((item, idx) => (
-              <div key={idx} className="p-4 rounded-lg bg-slate-900/60 border border-white/10 space-y-3">
+              <div
+                key={idx}
+                className={`p-4 rounded-lg bg-slate-900/60 border space-y-3 transition-all ${
+                  item.featured ? 'border-emerald-500/50 bg-slate-900/90 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'border-white/10'
+                }`}
+              >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                  <h3 className="font-bold text-base text-cyan-300">{item.title}</h3>
+                  <div className="flex items-center gap-2">
+                    {item.featured && <Star className="w-4 h-4 text-emerald-400 fill-emerald-400 shrink-0" />}
+                    <h3 className="font-bold text-base text-cyan-300">{item.title}</h3>
+                  </div>
                   {item.role && (
                     <span className="text-xs text-amber-400 font-semibold bg-amber-950/40 px-2 py-0.5 rounded border border-amber-500/30">
                       {item.role} {item.period ? `(${item.period})` : ''}
@@ -120,12 +145,13 @@ elvis-os: Interactive 3D computational portfolio world built with React, TypeScr
                 </div>
 
                 {item.subtitle && <p className="text-xs text-slate-400 font-semibold">{item.subtitle}</p>}
+
                 <p className="text-xs sm:text-sm text-slate-300 leading-relaxed whitespace-pre-line">
                   {item.description}
                 </p>
 
                 {/* Metrics */}
-                {item.metrics && (
+                {item.metrics && item.metrics.length > 0 && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2">
                     {item.metrics.map((m, mIdx) => (
                       <div key={mIdx} className="p-2 rounded bg-slate-950/60 border border-white/5">
@@ -165,11 +191,12 @@ elvis-os: Interactive 3D computational portfolio world built with React, TypeScr
                 {item.links && item.links.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
                     {item.links.map((link, lIdx) => {
-                      if (link.url === '#download-cv') {
+                      if (link.url.startsWith('#download-cv')) {
+                        const variantId = link.url.replace('#download-cv-', '').replace('#download-cv', '');
                         return (
                           <button
                             key={lIdx}
-                            onClick={handleDownloadCV}
+                            onClick={() => handleDownloadCV(variantId)}
                             className="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-all shadow-[0_0_12px_rgba(16,185,129,0.3)]"
                           >
                             <Download className="w-3.5 h-3.5" />

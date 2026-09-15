@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { KijijiNode } from '../types/portfolio';
-import { Server, Database, Bot, Radio, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { Server, Database, Bot, Radio, ArrowRight, ShieldCheck, Zap, Activity } from 'lucide-react';
 import { playClickSound } from '../utils/audio';
 
 interface KijijiMeshVisualizerProps {
@@ -34,12 +34,35 @@ export function KijijiMeshVisualizer({ nodes }: KijijiMeshVisualizerProps) {
 
   return (
     <div className="mt-4 p-4 rounded-lg bg-slate-950/80 border border-emerald-500/30 font-mono text-xs">
+      {/* Header */}
       <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-emerald-400 animate-pulse" />
-          <span className="font-bold text-emerald-400 tracking-wider">PROJECT KIJIJI :: MICROSERVICE MESH</span>
+          <span className="font-bold text-emerald-400 tracking-wider">PROJECT KIJIJI :: BGP TELEMETRY & NETWORK MESH</span>
         </div>
-        <span className="text-[10px] text-slate-500">INTERACTIVE GRAPH SIMULATOR</span>
+        <span className="text-[10px] text-slate-500">REAL-TIME GRAPH SIMULATOR</span>
+      </div>
+
+      {/* Verified Live Metrics Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 p-2.5 rounded bg-slate-900/80 border border-emerald-500/20 text-[10px]">
+        <div>
+          <span className="text-slate-500 block">GRAPHSAGE LOSS</span>
+          <span className="font-bold text-emerald-400">0.1434 (vs 0.6931)</span>
+        </div>
+        <div>
+          <span className="text-slate-500 block">TROMBONE DETOUR</span>
+          <span className="font-bold text-cyan-400">8.37x (NBO→LUN)</span>
+        </div>
+        <div>
+          <span className="text-slate-500 block">PEERING GAP</span>
+          <span className="font-bold text-amber-400">37x Capacity Ratio</span>
+        </div>
+        <div>
+          <span className="text-slate-500 block">ENGINE BRIDGE</span>
+          <span className="font-bold text-purple-400 flex items-center gap-1">
+            <Activity className="w-3 h-3 text-purple-400 animate-pulse" /> Rust Async Pipe
+          </span>
+        </div>
       </div>
 
       {/* Network Nodes Grid */}
